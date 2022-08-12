@@ -381,7 +381,7 @@ def coinc_sum(arr, sigma_width=1.5, tbinwidth=10, dtbinwidth_full=0.005,
     &= A \cdot \mathrm{erf} \left(\frac{w_\sigma}{\sqrt{2}} \right)
     \end{split}`
     
-    This value is then divided by :math:`w_dt` to get the total number of counts under the gaussian (unitless).
+    This value is then divided by :math:`w_{dt}` to get the total number of counts under the gaussian (unitless).
     
     """    
     if peakmodel is None:
