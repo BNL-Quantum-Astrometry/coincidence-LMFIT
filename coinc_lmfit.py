@@ -543,13 +543,17 @@ def fit_sin(tbinmids, coinc_arr, unc_arr=None, init_vals=None,
     return res
 
 
-def make_label(result):
+def make_label(result, percent=True):
     r"""Makes a legend label given the ModelResult of a SineModel fit.
     
     Parameters
     ----------
     result : LMFIT ModelResult
         The ``lmfit.ModelResult`` object, usually from ``fit_sin``.
+        
+    percent : bool
+        If True (default), include the percent uncertainty on the
+        best fit values.
         
     Returns
     -------
@@ -560,18 +564,20 @@ def make_label(result):
     -----
     The fitting function is not in the preferred form.
     :math:`F_\mathrm{fit}(x; A, f, \phi, c) = A \sin (f x + \phi) + c,
-    \quad F_\mathrm{plot}(x; A, \nu, \delta, c) = A \sin ( 2 \pi
-    (x / \nu + \delta)) + c`
+    \quad F_\mathrm{plot}(t; A, T, \delta, D) = A \cos ( (2 \pi
+    t / T) - \delta) + D`
+    
     This function does the conversion of both the values and
     uncertanties, and converts the time-units to seconds.
     
     This function uses ``sigfig.round`` to handle significant figures
     and uncertanties properly.
     
+    
     """
     paramnames = ['amplitude', 'frequency', 'shift', 'c']
-    varnames = ('A', r'\nu', r'\delta', 'C')
-    units = ('', 's', 's', '')
+    varnames = ('A', 'T', r'\delta', 'D')
+    units = ('', 's', '', '')
     optdict = result.best_values
     uncdict = {}
     for name in paramnames:
@@ -581,13 +587,17 @@ def make_label(result):
         uncdict.update({name : param_unc})
     
     optlist = [optdict['amplitude'], 120*np.pi/optdict['frequency'],
-                60*optdict['shift']/(2*np.pi), optdict['c']]
+                np.pi/2-optdict['shift'], optdict['c']]
+    if optlist[2]<0: optlist[2] += 2*np.pi
     unclist = [uncdict['amplitude'], 120*np.pi*uncdict[
                                         'frequency']/optdict['frequency']**2,
-              60*uncdict['shift']/(2*np.pi), uncdict['c']]
-    percentlist = [sigfig.round(abs(unc/opt*100), sigfigs=2,
-                    output_type=str) if ~np.isinf(unc) else r'\infty'\
-                                    for opt, unc in zip(optlist, unclist)]
+              uncdict['shift'], uncdict['c']]
+    if percent:
+        percentlist = [r' \ ({}%)'.format(sigfig.round(abs(unc/opt*100),
+                    sigfigs=2, output_type=str)) if ~np.isinf(unc)\
+                    else r'\infty' for opt, unc in zip(optlist, unclist)]
+    else:
+        percentlist = ['' for i in range(len(unclist))]
     
     optunc_strlist = []
     for opt, unc in zip(optlist, unclist):
@@ -598,7 +608,7 @@ def make_label(result):
             optunc_strlist.append(sigfig.round(opt,
                                         uncertainty=unc, separation=r'\pm'))
     
-    linelist = [r'${0} = {1} \ {2} \ ({3}\%)$'.format(varname, optunc,
+    linelist = [r'${0} = {1} \ {2} {3}$'.format(varname, optunc,
                     unit,percent) for varname, optunc, unit, percent in zip(
                             varnames, optunc_strlist, units, percentlist)]
 
@@ -698,6 +708,8 @@ def plot_chpairs(coinc_lists, res_lists=None, slice_lists=None,
                             mcolors.BASE_COLORS.keys())[:-2]
     
     fig, axs = plt.subplots(nrows=len(coinc_lists), **figure_kwargs)
+    if len(coinc_lists)==1:
+        axs = [axs,]
     for ax, coinc_list, res_list, slice_list in zip(axs, coinc_lists,
                                                 res_lists, slice_lists):
         ax.errorbar(*coinc_list, **errorbar_kwargs)
@@ -723,4 +735,6 @@ def plot_chpairs(coinc_lists, res_lists=None, slice_lists=None,
                                 ylabel_binwidth), fontsize=24, labelpad=20)
     plt.tight_layout(rect=(0,0,1,0.995))
     
+    if len(coinc_lists)==1:
+        return fig, axs[0], extra
     return fig, axs, extra
