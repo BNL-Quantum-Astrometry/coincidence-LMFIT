@@ -593,7 +593,7 @@ def make_label(result, percent=True):
                                         'frequency']/optdict['frequency']**2,
               uncdict['shift'], uncdict['c']]
     if percent:
-        percentlist = [r' \ ({}%)'.format(sigfig.round(abs(unc/opt*100),
+        percentlist = [r' \ ({}\%)'.format(sigfig.round(abs(unc/opt*100),
                     sigfigs=2, output_type=str)) if ~np.isinf(unc)\
                     else r'\infty' for opt, unc in zip(optlist, unclist)]
     else:
