@@ -577,7 +577,7 @@ def make_label(result, percent=True):
     """
     paramnames = ['amplitude', 'frequency', 'shift', 'c']
     varnames = ('A', 'T', r'\delta', 'D')
-    units = ('', 's', '', '')
+    units = ('', 's', 'rad', '')
     optdict = result.best_values
     uncdict = {}
     for name in paramnames:
@@ -608,7 +608,7 @@ def make_label(result, percent=True):
             optunc_strlist.append(sigfig.round(opt,
                                         uncertainty=unc, separation=r'\pm'))
     
-    linelist = [r'${0} = {1} \ {2} {3}$'.format(varname, optunc,
+    linelist = [r'${0} = {1} \ \mathrm{{{2}}} {3}$'.format(varname, optunc,
                     unit,percent) for varname, optunc, unit, percent in zip(
                             varnames, optunc_strlist, units, percentlist)]
 
