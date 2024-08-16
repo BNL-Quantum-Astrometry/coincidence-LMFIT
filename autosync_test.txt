@@ -1,1 +1,5 @@
 This is a test of the autosync package Pull for the BNL-Quantum-Astrometry fork of this repository.
+
+Manually triggering a sync was a success. (8-16-2024 16:48 EDT)
+
+Now a test of automatic syncing.
